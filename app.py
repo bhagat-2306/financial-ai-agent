@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from anomaly import detect_anomalies
 from explain import generate_explanation
+from audit import log_audit
 # -----------------------------
 # PAGE CONFIG
 # -----------------------------
@@ -52,6 +53,10 @@ if df is not None:
 
                 if st.button(f"Explain {row['transaction_id']}", key=idx):
                     explanation = generate_explanation(row, row["reason"])
+
+                    # Log audit
+                    log_audit(row, row["reason"], explanation)
+
                     st.success(explanation)
     else:
         st.success("No anomalies detected")
@@ -80,6 +85,22 @@ if df is not None:
     filtered_df = df[df["user_id"] == selected_user]
 
     st.dataframe(filtered_df, use_container_width=True)
+
+
+# -----------------------------
+# AUDIT TRAIL VIEWER
+# -----------------------------
+import json
+
+st.subheader("📜 Audit Trail Logs")
+
+if st.button("View Audit Logs"):
+    try:
+        with open("outputs/audit_logs.json", "r") as f:
+            logs = json.load(f)
+            st.json(logs)
+    except:
+        st.warning("No audit logs found yet.")
 
 # -----------------------------
 # FOOTER
