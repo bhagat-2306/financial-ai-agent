@@ -3,6 +3,7 @@ import pandas as pd
 from anomaly import detect_anomalies
 from explain import generate_explanation
 from audit import log_audit
+from report import generate_report
 # -----------------------------
 # PAGE CONFIG
 # -----------------------------
@@ -101,6 +102,26 @@ if st.button("View Audit Logs"):
             st.json(logs)
     except:
         st.warning("No audit logs found yet.")
+
+
+# -----------------------------
+# REPORT GENERATION
+# -----------------------------
+st.subheader("📄 Generate Compliance Report")
+
+if st.button("Generate Report"):
+    report_path = generate_report()
+
+    if report_path:
+        with open(report_path, "r") as f:
+            st.download_button(
+                label="Download Report",
+                data=f,
+                file_name="compliance_report.txt",
+                mime="text/plain"
+            )
+    else:
+        st.warning("No audit logs available to generate report.")
 
 # -----------------------------
 # FOOTER
