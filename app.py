@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from anomaly import detect_anomalies
-
+from explain import generate_explanation
 # -----------------------------
 # PAGE CONFIG
 # -----------------------------
@@ -44,7 +44,15 @@ if df is not None:
     anomalies = df[df["is_anomaly"] == 1]
 
     if len(anomalies) > 0:
-        st.dataframe(anomalies, use_container_width=True)
+        for idx, row in anomalies.iterrows():
+            with st.expander(f"Transaction {row['transaction_id']}"):
+                st.write(f"**Amount:** ₹{row['amount']}")
+                st.write(f"**Location:** {row['location']}")
+                st.write(f"**Reason:** {row['reason']}")
+
+                if st.button(f"Explain {row['transaction_id']}", key=idx):
+                    explanation = generate_explanation(row, row["reason"])
+                    st.success(explanation)
     else:
         st.success("No anomalies detected")
 
